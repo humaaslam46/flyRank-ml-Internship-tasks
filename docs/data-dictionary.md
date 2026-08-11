@@ -4,7 +4,6 @@ One row per content item (page): **30,000 rows × 44 columns**, covering **32 ps
 clients**. All metrics are aggregated over a trailing 90-day window ending at export time.
 Keep this file open while you work.
 
-## Read this first — the three rules that prevent 90% of mistakes
 
 1. **Rate columns are ×100 percentages.** `ctr = 0.76` means **0.76%**, not 76%. Applies to
    `ctr`, `engagement_rate`, `scroll_rate`, `ai_traffic_pct`, `trend_pct`.
