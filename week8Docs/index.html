@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refresh / Content Opportunity Scoring — A Ranked Action Engine for Content Review | Huma Aslam</title>
+<meta name="description" content="ML capstone: a ranked, reason-coded action engine for prioritizing content review, validated against an honest baseline on a client-grouped split.">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F7F4EC; --ink: #141310; --ink-soft: #4A473F;
+    --line: #E7E1D2; --accent: #C9962E; --accent-text: #8C6920; --card: #FFFFFF;
+    --font-display: 'Fraunces', serif; --font-body: 'Inter', sans-serif; --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--cream); color: var(--ink); font-family: var(--font-body); line-height: 1.7; }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+  img { max-width: 100%; display: block; border-radius: 10px; border: 1px solid var(--line); }
+  a { color: var(--accent-text); }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.15; }
+  h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); margin-bottom: 10px; }
+  h2 { font-size: clamp(1.3rem, 2.6vw, 1.7rem); margin-top: 52px; margin-bottom: 16px; padding-top: 24px; border-top: 1px solid var(--line); scroll-margin-top: 90px; }
+  h3 { font-size: 1.05rem; margin-top: 24px; margin-bottom: 8px; }
+  p, li { font-size: 1rem; color: var(--ink-soft); margin-bottom: 14px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-text); }
+  .header { padding: 60px 0 30px; }
+  .meta { font-size: 0.92rem; color: var(--ink-soft); margin-bottom: 24px; }
+  .abstract { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 24px 28px; margin-top: 20px; }
+  .abstract p { margin-bottom: 0; font-style: italic; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+  th { font-family: var(--font-mono); font-size: 0.76rem; color: var(--accent-text); }
+  .verdict { font-family: var(--font-mono); font-weight: 600; }
+  .verdict-confirmed { color: #3E8659; }
+  .verdict-mixed { color: #8C6910; }
+  code, .mono { font-family: var(--font-mono); font-size: 0.88em; background: #EFEBDD; padding: 1px 6px; border-radius: 4px; }
+  .callout { background: #FBF3E3; border-left: 3px solid var(--accent); padding: 14px 18px; border-radius: 6px; margin: 16px 0; font-size: 0.94rem; }
+  .highlight-stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .highlight-stat .num { font-family: var(--font-display); font-size: 2.2rem; font-weight: 600; color: var(--ink); }
+  footer { padding: 60px 0 80px; border-top: 1px solid var(--line); margin-top: 60px; font-size: 0.9rem; color: var(--ink-soft); }
+  .chart-caption { font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-soft); margin-top: 8px; margin-bottom: 24px; }
+  .toc { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px 24px; margin-top: 28px; }
+  .toc h3 { margin-top: 0; font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent-text); text-transform: uppercase; letter-spacing: 0.03em; }
+  .toc ol { padding-left: 20px; margin-top: 10px; }
+  .toc li { margin-bottom: 6px; font-size: 0.92rem; }
+  .toc a { color: var(--ink-soft); text-decoration: none; }
+  .toc a:hover { color: var(--accent-text); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="eyebrow">// ML Capstone — FlyRank AI Internship</div>
+    <h1>Refresh / Content Opportunity Scoring: A Ranked Action Engine for Content Review</h1>
+    <div class="meta">Huma Aslam &middot; Machine Learning Intern, FlyRank AI &middot; 2026</div>
+
+    <div class="abstract">
+      <p><strong>Abstract.</strong> With thousands of content pages and limited review capacity, which pages should a content team check first? I built a ranked scoring system combining a hand-written baseline rule with a Random Forest classifier trained on eight observable, pre-decision signals. Evaluated on a client-grouped, leakage-checked split, the model reached Precision@50 of 0.540 versus the baseline's 0.380 - a 1.42x improvement. A separate validation audit found that an ordinary random split overstates this same result by 59.3%, purely from client leakage - a finding that shaped every methodology decision in this paper. The result is directional and decision-support only, not causal.</p>
+    </div>
+
+    <div class="toc">
+      <h3>Contents</h3>
+      <ol>
+        <li><a href="#intro">Introduction / Problem statement</a></li>
+        <li><a href="#data">Data</a></li>
+        <li><a href="#methodology">Methodology</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#limitations">Limitations &amp; honest framing</a></li>
+        <li><a href="#recommendations">Ranked recommendations</a></li>
+        <li><a href="#reproducibility">Reproducibility</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <h2 id="intro">Introduction / Problem statement</h2>
+  <p>A website can have thousands of content pages and no reliable way to know which ones are quietly losing traffic. Manual review doesn't scale past a handful of pages per cycle, so the real decision this work supports is: <strong>given limited reviewer capacity, which pages should a content strategist check first?</strong></p>
+  <p>The action this ranking feeds is direct: a reviewer opens the top-ranked pages and decides whether to refresh, expand, or leave them. Getting the ranking wrong has a real cost either way - reviewer time wasted on pages that were never declining, or a genuinely declining high-traffic page missed for weeks while it keeps losing visibility.</p>
+
+  <h2 id="data">Data</h2>
+  <p>This work uses the FlyRank ML Internship starter release (<code>content_refresh_anonymized.csv</code>), a public-safe extract of 30,000 content-page rows across 32 anonymized clients, with pre-decision signals only - no product health flags, no post-hoc labels. No client names, domains, or private queries appear anywhere in this paper or the underlying notebooks.</p>
+  <p>The label used is a proxy, not an observed future outcome: <code>is_declining = (trend_direction == "down")</code>, a rule computed on the current window rather than a genuine past-to-future prediction. This limitation is treated as a first-class caveat throughout, not a footnote.</p>
+  <p><strong>Excluded by design:</strong> the starter release deliberately omits any product decision flags that would leak the answer into the features - confirmed directly in earlier notebook work, where feeding a label-derived signal (<code>trend_pct</code>) into a model pushed Precision@50 to a suspicious 1.000, the signature of leakage rather than a real result.</p>
+
+  <h2 id="methodology">Methodology</h2>
+  <h3>Signal verification, before any model was built</h3>
+  <p>Two candidate signals were checked directly against the data, each with a bucketed table and a one-word verdict, before either went into a scoring rule:</p>
+  <table>
+    <tr><th>Signal</th><th>Verdict</th><th>Finding</th></tr>
+    <tr><td>Staleness (days since update) vs. decline rate</td><td class="verdict verdict-mixed">MIXED</td><td>Decline rate rises from 51.1% (0&ndash;30 days) to 61.1% (91&ndash;180 days), then drops to 46.7% at 181&ndash;365 days on a much smaller, less reliable sample.</td></tr>
+    <tr><td>CTR vs. position tier</td><td class="verdict verdict-confirmed">CONFIRMED</td><td>Mean CTR rises monotonically from 0.150 (deep) to 1.484 (top 3), across all five tiers, each with a large sample (min n=1,319).</td></tr>
+  </table>
+  <p>The MIXED verdict directly shaped the baseline rule: staleness was only used within the 31&ndash;180 day window where the pattern actually held, not as a blanket signal.</p>
+
+  <h3>Baseline</h3>
+  <p>A hand-written rule combining visibility, moderate staleness, and CTR-vs-tier-expectation: <code>score = impressions_90d &times; is_moderately_stale &times; (1 / ctr_vs_tier_avg)</code>, with one reason code (<code>STALE_AND_CTR_UNDERPERFORM</code>) and an action label.</p>
+
+  <h3>Model and features</h3>
+  <p>A Random Forest classifier (300 trees, max depth 8, class-balanced) trained on eight pre-decision features: <code>impressions_90d, days_since_last_update, avg_position, ctr, word_count, engagement_rate, content_age_days, search_volume</code>. Random Forest was chosen over plain Logistic Regression because it can weigh multiple signals against each other and capture non-linear interactions the fixed baseline formula cannot.</p>
+
+  <h3>Validation design - and what changing it revealed</h3>
+  <p>The model was evaluated under two different split designs, deliberately, to measure how much the validation choice itself matters:</p>
+  <img src="chart_leakage_inflation.png" alt="Bar chart showing a naive random split scoring 0.860 Precision@50 versus an honest client-grouped split scoring 0.540">
+  <div class="chart-caption">Same model, same data, same metric - only the split design changed.</div>
+  <p>A <strong>naive random row-level split</strong> let 31 of 32 clients appear in both train and test, since a client's pages share systematic traits (industry, content style, baseline traffic). That leakage alone inflated Precision@50 to <strong>0.860</strong> - a number that looks excellent but proves nothing about generalizing to a new client.</p>
+  <p>The <strong>honest client-grouped split</strong> (<code>GroupShuffleSplit</code> on <code>client_id</code>, 75/25) produced 22,885 train rows across 24 clients and 7,115 test rows across 8 clients, with confirmed zero client overlap. This is the split used for every result reported from here forward.</p>
+  <div class="highlight-stat"><span class="num">59.3%</span> - how much the naive split overstated the model's real performance, purely from client leakage.</div>
+
+  <h2 id="results">Results</h2>
+  <img src="chart_baseline_vs_model.png" alt="Bar chart comparing baseline rule Precision@50 of 0.380 against Random Forest Precision@50 of 0.540">
+  <div class="chart-caption">Model vs. baseline, evaluated on the identical held-out, client-grouped test set.</div>
+  <p>The Random Forest reached <strong>Precision@50 = 0.540</strong> against the baseline rule's <strong>0.380</strong> - a <strong>1.42x</strong> improvement in how many of the top 50 ranked pages were genuinely declining, on a split where no client's data crossed between training and testing.</p>
+
+  <h3>Feature importance and error interpretation</h3>
+  <p><code>impressions_90d</code> and <code>content_age_days</code> dominate the model's decisions (permutation importance). Notably, <code>days_since_last_update</code> shows <em>negative</em> importance - directly confirming the earlier MIXED signal verdict: staleness alone is not a reliable predictor once other signals are available.</p>
+  <p>Among false positives (predicted declining, not actually), nearly all shared <code>ctr = 0.0</code> with small-to-moderate impressions. Among false negatives (real decliners scored lowest), the same <code>ctr = 0.0</code> pattern appears, but paired with very low <code>impressions_90d</code>. Both error types cluster around the same blind spot: very low-traffic, zero-CTR pages, where the underlying signal is thin either way.</p>
+
+  <h2 id="limitations">Limitations &amp; honest framing</h2>
+  <ul>
+    <li>The label is a <strong>proxy</strong>, computed on the current window, not an observed future outcome - this is directional, decision-support evidence, not a validated forecast.</li>
+    <li>The 1.42x improvement is <strong>observed on this dataset and this split</strong>; it is not a causal claim about what refreshing a page would do, and does not reflect or attempt to reverse-engineer Google's ranking algorithm.</li>
+    <li>Validation design changes the answer by nearly 60% on this same problem - any reported result (mine or anyone else's) should be read alongside its split design, not in isolation.</li>
+    <li>Both error types concentrate on very low-traffic pages - the model is weakest exactly where the data has the least signal to offer.</li>
+  </ul>
+
+  <h2 id="recommendations">Ranked recommendations</h2>
+  <p>The model's decline probability feeds a four-archetype action engine, applied to the full 7,115-page held-out set:</p>
+  <img src="chart_action_distribution.png" alt="Horizontal bar chart showing action distribution: Protect 33.7%, Review 25.2%, Monitor only 24.8%, Refresh now 16.4%">
+  <div class="chart-caption">Ranked action distribution across the held-out test set.</div>
+  <table>
+    <tr><th>Action</th><th>Share</th><th>Reason code</th></tr>
+    <tr><td>Refresh now</td><td>16.4%</td><td>HIGH_VISIBILITY_DECLINE_RISK - high traffic, high predicted risk</td></tr>
+    <tr><td>Review this cycle</td><td>25.2%</td><td>MODERATE_REVIEW - worth checking, not urgent</td></tr>
+    <tr><td>Protect / leave as-is</td><td>33.7%</td><td>HIGH_VISIBILITY_STABLE - high traffic, low predicted risk</td></tr>
+    <tr><td>Monitor only</td><td>24.8%</td><td>LOW_TRAFFIC_MONITOR_ONLY - too little visibility for a confident call</td></tr>
+  </table>
+  <ol>
+    <li><strong>Adopt the grouped-split model over the hand-written rule</strong> for weekly review-queue generation - the 1.42x gain is real and verified on a held-out, client-grouped split.</li>
+    <li><strong>Route the "Monitor only" 24.8% to a separate, lighter-touch track</strong> rather than the main ranked queue - this is exactly where the model's errors concentrate.</li>
+    <li><strong>Never validate a refresh model on a random row split</strong> - the 59.3% inflation found here should be treated as a standing warning for any future iteration of this work.</li>
+    <li><strong>Do not use staleness as a standalone flag</strong> outside the 31&ndash;180 day window - confirmed independently by both the signal check and the model's own negative feature importance.</li>
+    <li><strong>Revisit the label definition next</strong> - moving from a current-window proxy to a genuine past-90-day-features &rarr; next-30-day-outcome split would convert this from a directional signal into an actual forecasting validation.</li>
+  </ol>
+
+  <h2 id="reproducibility">Reproducibility</h2>
+  <p>Full notebooks and code: <a href="https://github.com/humaaslam46/Internship-ml" target="_blank" rel="noopener">github.com/humaaslam46/Internship-ml</a></p>
+  <ul>
+    <li><code>notebooks/01_first_look_and_discovery.ipynb</code> &mdash; initial pipeline run and discovery</li>
+    <li><code>work/notebooks/w01_research_question.ipynb</code> &mdash; lane selection and framing</li>
+    <li><code>work/notebooks/w02_ml_task_framing.ipynb</code> &mdash; task type, target, and success metric</li>
+    <li><code>work/notebooks/w03_data_contract.ipynb</code> &mdash; data contract, verification queries, leakage trap</li>
+    <li><code>work/notebooks/w04_baseline_score.ipynb</code> &mdash; signal checks and baseline rule</li>
+    <li><code>work/notebooks/w05_model.ipynb</code> &mdash; model, validation, and core results</li>
+    <li><code>work/notebooks/w06_validation_audit.ipynb</code> &mdash; the leakage audit and naive-vs-grouped comparison in this paper</li>
+    <li><code>work/notebooks/w07_action_playbook.ipynb</code> &mdash; the ranked action engine and archetype mapping</li>
+  </ul>
+
+  <div class="callout">Public rule followed: no client names, domains, URLs, private queries, credentials, or raw exports appear anywhere in this paper or its linked notebooks. No claim here proves or reverse-engineers Google's ranking algorithm or a causal refresh effect.</div>
+
+  <footer>
+    <p><strong>Acknowledgments &amp; data credit.</strong> Built on the FlyRank ML Internship dataset. Learn more at <a href="https://flyrank.ai" target="_blank" rel="noopener">flyrank.ai</a>.</p>
+  </footer>
+
+</div>
+</body>
+</html>
