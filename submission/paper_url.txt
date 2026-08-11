@@ -1,1 +1,1 @@
-PASTE-YOUR-DEPLOYED-PAPER-URL-HERE
+https://humaaslam46.github.io/ml-capstone-paper/
